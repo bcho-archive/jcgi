@@ -48,7 +48,7 @@ void request_dispatch(struct request_header *header, char *resp)
    "HTTP/1.1 200 OK\n"
    "Content-Type: text/json \n"
    "\n"
-   "{name: \"world\"}");
+   "{hello: \"world\"}");
 }
 
 void request_destory(struct request_header *header)
