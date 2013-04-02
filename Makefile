@@ -1,6 +1,8 @@
 .PHONY: clean
 
-server: server.c
+CFLAGS=-g
+
+server: request.o server.c
 
 client: client.c
 
