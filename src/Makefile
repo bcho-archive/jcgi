@@ -2,7 +2,7 @@
 
 CFLAGS=-g
 
-server: http.o request.o server.c
+server: dev.o http.o request.o response.o server.c
 
 http.o: error.o
 

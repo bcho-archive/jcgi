@@ -2,6 +2,8 @@
 
 #include "http.h"
 #include "request.h"
+#include "response.h"
+#include "dev.h"
 
 #define PORT 1024
 #define MAXLINE 1024 * 100
@@ -15,7 +17,8 @@ int main()
     while (1) {
         int clientfd;
         size_t limit;
-        char buf[MAXLINE], resp[MAXLINE];
+        char buf[MAXLINE];
+        char *resp;
         struct request_header *header;
 
         limit = MAXLINE;
@@ -23,14 +26,11 @@ int main()
         http_read(clientfd, &limit, buf);
 
         header = request_parse(buf);
-        if (request_validate(header)) {
-            request_dispatch(header, resp);
-        } else {
-            sprintf(resp, "HTTP 1.1 400\n");
-        }
-        request_destory(header);
-
+        resp = response_build(header, dispatcher);
         http_write(clientfd, resp);
+
+        request_destory(header);
+        response_destory(resp);
         http_close_client(clientfd);
     }
 
