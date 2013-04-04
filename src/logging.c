@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "logging.h"
+
+#define MAX_LENGTH 1024
 
 struct logger {
     FILE *log_stream;
@@ -42,10 +45,16 @@ void logging_destory()
     fclose(LOGGER.log_stream);
 }
 
-void logging_log(logging_level_t level, char *msg)
+void logging_log(logging_level_t level, char *format, ...)
 {
+    char msg[MAX_LENGTH];
+    va_list list;
+
     if (level < LOGGER.lowest_level)
         return;
-    fprintf(LOGGER.log_stream, LOGGER.log_format, level_str(level), msg);
+    sprintf(msg, LOGGER.log_format, level_str(level), format);
+    va_start(list, format);
+    vfprintf(LOGGER.log_stream, msg, list);
+    va_end(list);
     fflush(LOGGER.log_stream);
 }

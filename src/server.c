@@ -18,7 +18,7 @@ int main()
     logging_setup(log, NORMAL, NULL);
 
     httpfd = http_create(PORT, 50);
-    logging_log(NORMAL, "Server started...");
+    logging_log(NORMAL, "Server started, listening at %d", PORT);
 
     while (1) {
         int clientfd;
@@ -30,7 +30,7 @@ int main()
         limit = MAXLINE;
         clientfd = http_accept(httpfd);
         http_read(clientfd, &limit, buf);
-        logging_log(NORMAL, "Got request from client");
+        logging_log(NORMAL, "Got request <length: %d> from client", limit);
 
         header = request_parse(buf);
         resp = response_build(header, dispatcher);
