@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "logging.h"
 #include "http.h"
 #include "request.h"
 #include "response.h"
@@ -11,8 +12,13 @@
 int main()
 {
     int httpfd;
+    FILE *log;
+
+    log = stdout;
+    logging_setup(log, NORMAL, NULL);
 
     httpfd = http_create(PORT, 50);
+    logging_log(NORMAL, "Server started...");
 
     while (1) {
         int clientfd;
@@ -24,6 +30,7 @@ int main()
         limit = MAXLINE;
         clientfd = http_accept(httpfd);
         http_read(clientfd, &limit, buf);
+        logging_log(NORMAL, "Got request from client");
 
         header = request_parse(buf);
         resp = response_build(header, dispatcher);
@@ -32,9 +39,11 @@ int main()
         request_destory(header);
         response_destory(resp);
         http_close_client(clientfd);
+        logging_log(NORMAL, "Responsed");
     }
 
     http_close(httpfd);
+    logging_destory();
 
     return 0;
 }
