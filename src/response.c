@@ -4,7 +4,9 @@
 
 #include "server.h"
 #include "response.h"
+#include "http_header.h"
 #include "error.h"
+#include "logging.h"
 
 #define MAX_BODY_LEN 1024 * 100
 #define MAX_HEADER_LEN 1024
@@ -42,39 +44,58 @@ static void response_status_line(status_code_t status_code, char *status_line)
             reason_parse(status_code));
 }
 
-static void response_header(char *header)
+static void response_header(char *header, struct http_header *fields)
 {
-    sprintf(header, "\r\n");
+    char buf[MAX_HEADER_LEN];
+
+    while (fields != NULL) {
+        sprintf(buf, "%s:%s\n", fields->name, fields->value);
+        strcat(header, buf);
+        fields = fields->next;
+    }
+    strcat(header, "\r\n");
 }
 
-char *response_build(const struct request_header *header,
+char *response_build(const struct request_header *rq_header,
                      dispatcher_t dispatcher)
 {
     resp_t func;
-    char *resp, *resp_header, *body;
+    char *rp, *rp_status_line, *rp_header, *rp_body;
     status_code_t code;
+    struct http_header *http_header;
+    char body_length[20], content_type[20];
 
-    resp= malloc(sizeof(char) * MAX_STATUS_LINE_LEN);
-    resp_header = malloc(sizeof(char) * MAX_HEADER_LEN);
-    body = malloc(sizeof(char) * MAX_BODY_LEN);
-    if (!resp || !body || !resp_header)
+    rp_status_line = malloc(sizeof(char) * MAX_STATUS_LINE_LEN);
+    rp_header = malloc(sizeof(char) * MAX_HEADER_LEN);
+    rp_body = malloc(sizeof(char) * MAX_BODY_LEN);
+    if (!rp_status_line || !rp_header || !rp_body)
         error("Build response");
 
-    func = dispatcher(header->path);
+    /* generate response body */
+    func = dispatcher(rq_header->path);
+    func(rq_header->path, rp_body, &code, content_type);
+    logging_log(NORMAL, "Response <%d %s>", code, content_type);
 
-    func(header->path, body, &code);
-    response_status_line(code, resp);
-    response_header(resp_header);
-    resp = realloc(resp, sizeof(char) * (strlen(resp) + strlen(resp_header) +
-                                         strlen(body) + 1));
+    /* generate header */
+    response_status_line(code, rp_status_line);
+    rp_header[0] = 0;
+    http_header = header_create("Server", SERVERNAME "/" VERSION);
+    sprintf(body_length, "%d", strlen(rp_body));
+    header_append(http_header, header_create("Content-Length", body_length));
+    header_append(http_header, header_create("Content-Type", content_type));
+    response_header(rp_header, http_header);
+    header_destory(http_header);
+
     /* concat into response */
     // TODO use str join
-    strcat(resp, resp_header);
-    strcat(resp, body);
-    free(resp_header);
-    free(body);
+    rp = malloc(sizeof(char) * (strlen(rp_status_line) + strlen(rp_header) +
+                                strlen(rp_body) + 1));
+    sprintf(rp, "%s%s%s", rp_status_line, rp_header, rp_body);
+    free(rp_status_line);
+    free(rp_header);
+    free(rp_body);
 
-    return resp;
+    return rp;
 }
 
 void response_destory(char *resp)
