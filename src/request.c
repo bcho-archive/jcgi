@@ -42,15 +42,6 @@ int request_validate(struct request_header *header)
     return 1;
 }
 
-void request_dispatch(struct request_header *header, char *resp)
-{
-    sprintf(resp, ""
-   "HTTP/1.1 200 OK\n"
-   "Content-Type: text/json \n"
-   "\n"
-   "{hello: \"world\"}");
-}
-
 void request_destory(struct request_header *header)
 {
     if (header != NULL) {
