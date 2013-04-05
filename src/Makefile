@@ -1,8 +1,16 @@
 .PHONY: clean
 
-CFLAGS=-g
+CFLAGS=
 
-server: dev.o logging.o http.o request.o response.o server.c
+test: server
+
+build: server
+
+test: CFLAGS=-g -DLOG_LEVEL=DEBUG
+
+build: CFLAGS=-DLOG_LEVEL=NORMAL
+
+server: dev.o http_header.o logging.o http.o request.o response.o server.c
 
 http.o: error.o
 
