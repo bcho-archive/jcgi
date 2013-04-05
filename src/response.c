@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "server.h"
 #include "response.h"
 #include "error.h"
 

@@ -1,12 +1,12 @@
 #include <stdio.h>
 
+#include "server.h"
 #include "logging.h"
 #include "http.h"
 #include "request.h"
 #include "response.h"
 #include "dev.h"
 
-#define PORT 1024
 #define MAXLINE 1024 * 100
 
 int main()
@@ -15,7 +15,7 @@ int main()
     FILE *log;
 
     log = stdout;
-    logging_setup(log, NORMAL, NULL);
+    logging_setup(log, LOG_LEVEL, NULL);
 
     httpfd = http_create(PORT, 50);
     logging_log(NORMAL, "Server started, listening at %d", PORT);
