@@ -82,8 +82,10 @@ void response_destory(char *resp)
         free(resp);
 }
 
-void default_resp(char *args, char *buf, status_code_t *code)
+void default_resp(char *args, char *buf, status_code_t *code,
+                  char *content_type)
 {
     sprintf(buf, "Hello World!");
     *code = OK;
+    sprintf(content_type, "text/plain");
 }

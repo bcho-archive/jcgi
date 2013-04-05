@@ -18,12 +18,14 @@ typedef enum {
     INTERNAL_SERVER_ERROR = 500
 } status_code_t;
 
-typedef void (*resp_t)(char *args, char *buf, status_code_t *code);
+typedef void (*resp_t)(char *args, char *buf, status_code_t *code,
+                       char *content_type);
 typedef resp_t (*dispatcher_t)(char *path);
 
 char *response_build(const struct request_header *header,
                      dispatcher_t dispatcher);
 void response_destory(char *resp);
-void default_resp(char *args, char *buf, status_code_t *code);
+void default_resp(char *args, char *buf, status_code_t *code,
+                  char *content_type);
 
 #endif
